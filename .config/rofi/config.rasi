@@ -1,0 +1,5 @@
+configuration {
+ font: "Mononoki Nerd Font 20";
+}
+
+@theme "/home/milan/.config/rofi/themes/squared-nord.rasi"
