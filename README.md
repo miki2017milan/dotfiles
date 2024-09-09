@@ -12,4 +12,9 @@ GRUB_TIMEOUT_STYLE=hidden
 ```
 
 # SDDM login screen
-Just copy the sddm-themes dir into the sddm themes dir and rename it
+Just copy the sddm-themes dir into '/usr/share/sddm/themes' and rename it to whatever you want. Then edit '/usr/lib/sddm/sddm.conf.d/default.conf'
+``` python
+[Theme]
+# Current theme name
+Current="Your theme name"
+```

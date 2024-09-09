@@ -104,6 +104,8 @@ keys = [
     Key([mod, "shift"], "w", lazy.spawn("rofi -show window -show-icons"), desc='List all active windows'),
     Key([mod], "F4", lazy.spawn("dm-exit"), desc='Run exit script'),
 
+    Key([mod], "F7", lazy.spawn("xprop"), desc='Run exit script'),
+
     Key([], "XF86AudioRaiseVolume", lazy.spawn("pamixer --increase 10"), desc='Raise Volume'),
     Key([], "XF86AudioLowerVolume", lazy.spawn("pamixer --decrease 10"), desc='Lower Volume'),
     Key([], "XF86AudioMute", lazy.spawn("pamixer -t"), desc='Mute Volume'),
@@ -289,8 +291,7 @@ def init_widgets_list():
         widget.Memory(
                  foreground = colors[8],
                  format = '{MemUsed: .0f}{mm}',
-                 fmt = '  {} / 16G',
-                 measure_mem = 'G'
+                 fmt = '  {} / 16G'
                  ),
         spacer,
         widget.DF(

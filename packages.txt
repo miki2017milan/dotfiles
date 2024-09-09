@@ -13,6 +13,7 @@ neofetch
 network-manager-applet
 networkmanager
 picom
+pulseaudio
 python-pip
 python-psutil
 qtile
