@@ -104,12 +104,12 @@ keys = [
     Key([mod, "shift"], "w", lazy.spawn("rofi -show window -show-icons"), desc='List all active windows'),
     Key([mod], "F4", lazy.spawn("dm-exit"), desc='Run exit script'),
 
-    Key([], "XF86AudioRaiseVolume", lazy.spawn("amixer set Master 10%+"), desc='Raise Volume'),
-    Key([], "XF86AudioLowerVolume", lazy.spawn("amixer set Master 10%-"), desc='Lower Volume'),
-    Key([], "XF86AudioMute", lazy.spawn("amixer set Master 0"), desc='Mute Volume'),
+    Key([], "XF86AudioRaiseVolume", lazy.spawn("pamixer --increase 10"), desc='Raise Volume'),
+    Key([], "XF86AudioLowerVolume", lazy.spawn("pamixer --decrease 10"), desc='Lower Volume'),
+    Key([], "XF86AudioMute", lazy.spawn("pamixer -t"), desc='Mute Volume'),
 
-    Key([], "XF86MonBrightnessDown", lazy.spawn("sudo xbacklight -dec 10"), desc='Lower Backlight'),
-    Key([], "XF86MonBrightnessUp", lazy.spawn("sudo xbacklight -inc 10"), desc='Raise Backlight'),
+    Key([], "XF86MonBrightnessDown", lazy.spawn("sudo xbacklight -dec 1"), desc='Lower Backlight'),
+    Key([], "XF86MonBrightnessUp", lazy.spawn("sudo xbacklight -inc 1"), desc='Raise Backlight'),
 
     Key([], "XF86AudioPlay", lazy.spawn("dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"), desc='Resume/Pause Spotify'),
     Key([], "XF86AudioNext", lazy.spawn("dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next"), desc='Next song in Spotify'),
@@ -117,12 +117,14 @@ keys = [
 ]
 
 groups = []
-group_names = ["1", "2", "3", "4", "5", "6", "7", "8", "9",]
+group_names = ["1", "2", "3", "4"]
+group_labels = ["Code", "WWW", "Music", "Other"]
 
 for i in range(len(group_names)):
     groups.append(
         Group(
             name=group_names[i],
+            label=group_labels[i]
         ))
 
 for i in groups:
@@ -248,9 +250,8 @@ def get_battery_icon_chargeing(percent):
         return "󰢜 "
 
 def init_widgets_list():
-    line = widget.TextBox(
-                 text = ' |',
-                 # font = "Ubuntu Mono",
+    spacer = widget.TextBox(
+                 text = ' | ',
                  foreground = colors[1],
                  padding = 2,
                  )
@@ -272,18 +273,7 @@ def init_widgets_list():
                  other_screen_border = colors[4],
                  ),
         widget.TextBox(
-                 text = ' | ',
-                 # font = "Ubuntu Mono",
-                 foreground = colors[1],
-                 padding = 2,
-                 ),
-        widget.CurrentLayout(
-                 foreground = colors[1],
-                 padding = 5
-                 ),
-        widget.TextBox(
-                 text = ' | ',
-                 # font = "Ubuntu Mono",
+                 text = '| ',
                  foreground = colors[1],
                  padding = 2,
                  ),
@@ -291,56 +281,71 @@ def init_widgets_list():
                  foreground = colors[6],
                  max_chars = 40
                  ),
-        widget.Spacer(length = 8),
         widget.CPU(
-                 format = 'Cpu: {load_percent}%',
+                 format = '  {load_percent}%',
                  foreground = colors[4],
                  ),
-        line,
-        widget.Spacer(length = 8),
+        spacer,
         widget.Memory(
                  foreground = colors[8],
                  format = '{MemUsed: .0f}{mm}',
-                 fmt = 'Mem: {} used',
+                 fmt = '  {} / 16G',
+                 measure_mem = 'G'
                  ),
-        line,
-        widget.Spacer(length = 8),
+        spacer,
         widget.DF(
                  update_interval = 60,
                  foreground = colors[5],
                  partition = '/',
                  format = '{uf}{m} free',
-                 fmt = 'Disk: {}',
+                 fmt = '  {}',
                  visible_on_warn = False,
                  ),
-        line,
-        widget.Spacer(length = 8),
-        widget.Volume(
+        spacer,
+        widget.PulseVolume(
                  foreground = colors[7],
-                 fmt = 'Vol: {}',
+                 fmt = '{}',
+                 emoji = True,
+                 emoji_list = ["󰝟 ", "󰕿 ", "󰖀 ", "󰕾 "],
+                 fontsize = 25
+                 #get_volume_command = "amixer get Master",
+                 #volume_app = "amixer",
+                 #mute_format = "hi",
+                 #unmute_format = 'Vol: {}',
+                 #mute_command = "pamixer -t",
+                 #check_mute_command = "pamixer --get-mute",
+                 #check_mute_string = ['true']
                  ),
-        line,
-        widget.Spacer(length = 8),
+        widget.PulseVolume(
+                 foreground = colors[7],
+                 fmt = '{}',
+                 # emoji = True,
+                 # emoji_list = ["󰝟 ", "󰕿 ", "󰖀 ", "󰕾 "]
+                 #get_volume_command = "amixer get Master",
+                 #volume_app = "amixer",
+                 #mute_format = "hi",
+                 #unmute_format = 'Vol: {}',
+                 #mute_command = "pamixer -t",
+                 #check_mute_command = "pamixer --get-mute",
+                 #check_mute_string = ['true']
+                 ),
+        spacer,
         widget.Battery(
             full_char="󰁹 ",
             format="{char}{percent:2.0%}",
             update_interval=10,
-            #lazy.widget["battery"].force_update()
             mouse_callbacks = {'Button1': lazy.widget["battery"].force_update()}
         ),
-        line,
-        widget.Spacer(length = 8),
+        spacer,
         widget.Clock(
                  foreground = colors[8],
                  format = "%a, %b %d - %H:%M",
                  ),
-        widget.Spacer(length = 8),
         widget.Systray(padding = 3),
-        widget.Spacer(length = 8),
     ]
 
     # Battery
-    battery = widgets_list[18]
+    battery = widgets_list[12]
     battery_percent = battery._battery.update_status().percent
     battery.discharge_char = get_battery_icon_dischargeing(battery_percent)
     battery.charge_char = get_battery_icon_chargeing(battery_percent)
