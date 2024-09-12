@@ -18,3 +18,9 @@ Just copy the sddm-themes dir into '/usr/share/sddm/themes' and rename it to wha
 # Current theme name
 Current="Your theme name"
 ```
+
+# yay
+1. git clone https://aur.archlinux.org/yay.git
+2. cd yay
+3. makepkg -si
+4. Done!
