@@ -27,6 +27,7 @@ qtile 0.28.1-1
 rofi 1.7.5-3
 sddm 0.21.0-4
 spotify 1:1.2.42.290-1
+sxiv 26-2
 thunderbird 115.14.0-1
 ttf-hack-nerd 3.2.1-2
 ttf-mononoki-nerd 3.2.1-2
