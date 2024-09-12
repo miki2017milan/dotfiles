@@ -61,7 +61,7 @@ keys = [
     Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
     Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
     Key([mod], "tab", lazy.layout.next(), desc="Move window focus to other window"),
-    Key([mod], "i", lazy.window.disable_floating()),
+    Key([mod], "i", lazy.window.toggle_floating()),
 
     # Move windows between left/right columns or move up/down in current stack.
     # Moving out of range in Columns layout will create new column.
@@ -152,7 +152,7 @@ for i in groups:
 colors = colors.DoomOne
 
 layout_theme = {"border_width": 3,
-                "margin": 10,
+                "margin": 3,
                 "border_focus": colors[7],
                 "border_normal": colors[0]
                 }
@@ -211,7 +211,6 @@ widget_defaults = dict(
 extension_defaults = widget_defaults.copy()
 
 def get_battery_icon_dischargeing(percent):
-    print(percent)
     if percent >= 0.9:
         return "󰂂 "
     if percent >= 0.8:
@@ -228,8 +227,7 @@ def get_battery_icon_dischargeing(percent):
         return "󰁼 "
     if percent >= 0.2:
         return "󰁻 "
-    if percent >= 0.1:
-        return "󰁺 "
+    return "󰁺 "
 
 def get_battery_icon_chargeing(percent):
     if percent >= 0.9:
@@ -248,8 +246,7 @@ def get_battery_icon_chargeing(percent):
         return "󰂇 "
     if percent >= 0.2:
         return "󰂆 "
-    if percent >= 0.1:
-        return "󰢜 "
+    return "󰢜 "
 
 def init_widgets_list():
     spacer = widget.TextBox(
@@ -264,15 +261,15 @@ def init_widgets_list():
                  padding_y = 0,
                  padding_x = 2,
                  borderwidth = 3,
-                 active = colors[6],
+                 active = colors[1],
                  inactive = colors[1],
-                 rounded = False,
-                 highlight_color = colors[2],
+                 rounded = True,
+                 highlight_color = colors[0],
                  highlight_method = "line",
                  this_current_screen_border = colors[1],
-                 this_screen_border = colors [4],
+                 this_screen_border = colors [1],
                  other_current_screen_border = colors[7],
-                 other_screen_border = colors[4],
+                 other_screen_border = colors[7],
                  ),
         widget.TextBox(
                  text = '| ',
@@ -335,14 +332,25 @@ def init_widgets_list():
             full_char="󰁹 ",
             format="{char}{percent:2.0%}",
             update_interval=10,
-            mouse_callbacks = {'Button1': lazy.widget["battery"].force_update()}
+            # mouse_callbacks = {'Button1': lazy.widget["battery"].force_update()}
+        ),
+        spacer,
+        widget.Bluetooth(
+                 default_text = "BT Devices connected: {num_connected_devices}",
+                 default_show_battery = True,
+                 default_timeout = 10
         ),
         spacer,
         widget.Clock(
                  foreground = colors[8],
                  format = "%a, %b %d - %H:%M",
                  ),
-        widget.Systray(padding = 3),
+        widget.TextBox(
+                 text = ' ',
+                 foreground = colors[1],
+                 padding = 3,
+                 ),
+        widget.Systray(),
     ]
 
     # Battery
@@ -356,7 +364,10 @@ def init_widgets_list():
 # For ex: Screen(top=bar.Bar(widgets=init_widgets_screen2(), background="#00000000", size=24)),
 
 if __name__ in ["config", "__main__"]:
-    screens = [Screen(top=bar.Bar(widgets=init_widgets_list(), size=26))]
+    temp = init_widgets_list()
+    #Screen(top=bar.Bar(widgets=temp[:16], size=26))
+    screens = [Screen(top=bar.Bar(widgets=temp, size=26)),
+               Screen(top=bar.Bar(widgets=temp[:18], size=26))]
 
 mouse = [
     Drag([mod], "Button1", lazy.window.set_position_floating(), start=lazy.window.get_position()),
