@@ -1,5 +1,15 @@
-configuration {
- font: "Mononoki Nerd Font 20";
+configuration{
+    modi: "drun,window";
+    icon-theme: "Papirus-Dark";
+    show-icons: true;
+    terminal: "alacritty";
+    drun-display-format: "{icon} {name}";
+    location: 0;
+    disable-history: false;
+    hide-scrollbar: false;
+    display-drun: "    Run  ";
+    sidebar-mode: false;
 }
 
-@theme "/home/milan/.config/rofi/themes/squared-nord.rasi"
+@theme "catppuccin-mocha"
+

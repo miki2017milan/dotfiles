@@ -1,22 +1,17 @@
-# Backlights
-For the backlight control you'll need to add xbacklight to the sudoers file
-``` python
-%wheel ALL=(ALL:ALL) NOPASS: /usr/bin/xbacklight
-```
-
 # Grub Menu
-If you want to have the same grub config then change this:
+My grub settings
 ``` python
 GRUB_TIMEOUT=3
 GRUB_TIMEOUT_STYLE=hidden
 ```
 
 # SDDM login screen
-Just copy the sddm-themes dir into '/usr/share/sddm/themes' and rename it to whatever you want. Then edit '/usr/lib/sddm/sddm.conf.d/default.conf'
+Install the 'sddm-sugar-dark' package from the AUR for all the dependencies. Then replace the sugar-dark folder in '/usr/share/sddm/themes' with the sugar-dark folder in this reposetory. 
+Then edit '/usr/lib/sddm/sddm.conf.d/default.conf'
 ``` python
 [Theme]
 # Current theme name
-Current="Your theme name"
+Current=sugar-dark
 ```
 
 # yay

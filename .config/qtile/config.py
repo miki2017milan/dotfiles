@@ -1,373 +1,350 @@
-# Copyright (c) 2010 Aldo Cortesi
-# Copyright (c) 2010, 2014 dequis
-# Copyright (c) 2012 Randall Ma
-# Copyright (c) 2012-2014 Tycho Andersen
-# Copyright (c) 2012 Craig Barnes
-# Copyright (c) 2013 horsik
-# Copyright (c) 2013 Tao Sauvage
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
-import os
+### IMPORTS ###
+import sys
 import subprocess
-from libqtile import bar, extension, hook, layout, qtile, widget
-from libqtile.config import Click, Drag, Group, Key, KeyChord, Match, Screen
+from os.path import expanduser, exists, normpath, getctime
+from subprocess import run
+from os import system, listdir, makedirs
+from datetime import datetime
+from libqtile import layout, qtile, hook, bar, core
+from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
-import colors
+from qtile_extras import widget
+from json import dump, load
 
-mod = "mod4"              # Sets mod key to SUPER/WINDOWS
-myTerm = "alacritty"      # My terminal of choice
-myBrowser = "firefox"       # My browser of choices
+sys.path.append(expanduser('~/.config/qtile'))
 
-# A function for hide/show all the windows in a group
+from variables import *
+
+screenshots_path = expanduser(screenshots_path)
+autostart_file = expanduser(autostart_file)
+
+if not exists(screenshots_path):
+    makedirs(screenshots_path)
+
+### LAYOUTS ###
+
+layout_theme = {
+    "border_width": layouts_border_width,
+    "margin": layouts_margin,
+    "border_focus": layouts_border_focus_color,
+    "border_normal": layouts_border_color,
+    "border_on_single": layouts_border_on_single
+}
+
+layouts_tweaks = {
+    "MonadTall": {
+        "ratio": 0.57,
+        "min_ratio": 0.5,
+        "max_ratio": 0.7,
+        "change_size": 20,
+        "change_ratio": 0.01,
+    },
+}
+
+layouts = [getattr(layout, i)(**(layout_theme|layouts_tweaks.get(i, {}))) for i in layouts]
+
+### CUSTOM FUNCTIONS ###
+
 @lazy.function
-def minimize_all(qtile):
-    for win in qtile.current_group.windows:
-        if hasattr(win, "toggle_minimize"):
-            win.toggle_minimize()
+def volume_up(_qtile):
+    system('pamixer -i 5')
+    system('sh ~/.config/qtile/scripts/show_volume.sh')
+
+@lazy.function
+def volume_down(_qtile):
+    system('pamixer -d 5')
+    system('sh ~/.config/qtile/scripts/show_volume.sh')
+
+@lazy.function
+def volume_mute(_qtile):
+    system('pamixer -t')
+    system('sh ~/.config/qtile/scripts/show_volume.sh')
+
+@lazy.function
+def screenshot(_qtile, mode):
+    system(f'flameshot {mode} -c -p {screenshots_path}')
+    system(f'dunstify "  Screenshot taken!" "Saved under \'{screenshots_path}\' (When not aborded)"')
+
+@lazy.function
+def switch_audio(_qtile):
+    system("sh ~/.config/qtile/scripts/switch_audio.sh")
 
 keys = [
-    # The essentials
-    Key([mod], "Return", lazy.spawn(myTerm), desc="Terminal"),
-    Key([mod], "b", lazy.spawn(myBrowser), desc='Web browser'),
-    Key([mod], "v", lazy.spawn("code"), desc='Opens VSCode'), 
-    Key([mod], "f", lazy.next_layout(), desc="Toggle between layouts"),
-    Key([mod], "w", lazy.window.kill(), desc="Kill focused window"),
-    Key([mod, "shift"], "r", lazy.reload_config(), desc="Reload the config"),
-    Key([mod], "m", minimize_all(), desc="Minimizes all windows"),
-    
-    # Switch between windows
-    # Some layouts like 'monadtall' only need to use j/k to move
-    # through the stack, but other layouts like 'columns' will
-    # require all four directions h/j/k/l to move around.
-    Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
-    Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
-    Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
-    Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
-    Key([mod], "tab", lazy.layout.next(), desc="Move window focus to other window"),
-    Key([mod], "i", lazy.window.toggle_floating()),
+    # Window Management
 
-    # Move windows between left/right columns or move up/down in current stack.
-    # Moving out of range in Columns layout will create new column.
-    Key([mod, "shift"], "h",
-        lazy.layout.shuffle_left(),
-        desc="Move window to the left"
-    ),
-    Key([mod, "shift"], "l",
-        lazy.layout.shuffle_right(),
-        desc="Move window to the right"
-    ),
-    Key([mod, "shift"], "j",
-        lazy.layout.shuffle_down(),
-        desc="Move window down"
-    ),
-    Key([mod, "shift"], "k",
-        lazy.layout.shuffle_up(),
-        desc="Move window up"
-    ),
+    Key([mod], "left", lazy.layout.left(), desc="Move focus to left"),
+    Key([mod], "right", lazy.layout.right(), desc="Move focus to right"),
+    Key([mod], "down", lazy.layout.down(), desc="Move focus down"),
+    Key([mod], "up", lazy.layout.up(), desc="Move focus up"),
+    Key([mod, "shift"], "left", lazy.layout.shuffle_left(), desc="Move window to the left"),
+    Key([mod, "shift"], "right", lazy.layout.shuffle_right(), desc="Move window to the right"),
+    Key([mod, "shift"], "down", lazy.layout.shuffle_down(), desc="Move window down"),
+    Key([mod, "shift"], "up", lazy.layout.shuffle_up(), desc="Move window up"),
 
-    # Grow/shrink windows left/right. 
-    # This is mainly for the 'monadtall' and 'monadwide' layouts
-    # although it does also work in the 'bsp' and 'columns' layouts.
-    Key([mod], "plus",
-        lazy.layout.grow().when(layout=["monadtall"]),
-        desc="Grow window to the left"
-    ),
-    Key([mod], "minus",
-        lazy.layout.shrink().when(layout=["monadtall"]),
-        desc="Grow window to the left"
-    ),
-
-    # Switch focus of monitors
     Key([mod], "period", lazy.next_screen(), desc='Move focus to next monitor'),
-    Key([mod], "comma", lazy.prev_screen(), desc='Move focus to prev monitor'),
+
+    Key([mod], "plus", lazy.layout.grow(), desc="Grow window"),
+    Key([mod], "minus", lazy.layout.shrink(), desc="Shrink window"),
+    Key([mod], "r", lazy.layout.normalize(), desc="Reset all window sizes"),
+
+    Key([mod], "q", lazy.window.kill(), desc="Kill focused window"),
+    Key([mod], "x", lazy.window.toggle_floating(), desc="Toggle floating on the focused window"),
+    Key([mod], "Tab", lazy.layout.next(), desc="Move window focus to other window"),
     
-    # Dmenu/rofi scripts launcher
-    Key([mod, "control"], "Return", lazy.spawn("script-hub"), desc='List all dmscripts'), 
-    Key([mod, "shift"], "Return", lazy.spawn('rofi -show drun -show-icons -display-drun "Applications"'), desc='Run Launcher'),
-    Key([mod, "shift"], "w", lazy.spawn("rofi -show window -show-icons"), desc='List all active windows'),
-    Key([mod], "F4", lazy.spawn("dm-exit"), desc='Run exit script'),
+    Key([mod], "f", lazy.next_layout(), desc="Toggle fullscreen on the focused window",),
+    Key([mod, "shift"], "f", lazy.window.toggle_fullscreen(), desc="Toggle full-fullscreen on the focused window",),
 
-    Key([mod], "F7", lazy.spawn("xprop"), desc='Run exit script'),
+    # Media
 
-    Key([], "XF86AudioRaiseVolume", lazy.spawn("pamixer --increase 10"), desc='Raise Volume'),
-    Key([], "XF86AudioLowerVolume", lazy.spawn("pamixer --decrease 10"), desc='Lower Volume'),
-    Key([], "XF86AudioMute", lazy.spawn("pamixer -t"), desc='Mute Volume'),
+    Key([], "XF86AudioRaiseVolume", volume_up()),
+    Key([], "XF86AudioLowerVolume", volume_down()),
+    Key([], "XF86AudioMute", volume_mute()),
+    Key([], "XF86AudioPlay", lazy.spawn('playerctl play-pause')),
+    Key([], "XF86AudioPrev", lazy.spawn('playerctl previous')),
+    Key([], "XF86AudioNext", lazy.spawn('playerctl next')),
 
-    Key([], "XF86MonBrightnessDown", lazy.spawn("sudo xbacklight -dec 1"), desc='Lower Backlight'),
-    Key([], "XF86MonBrightnessUp", lazy.spawn("sudo xbacklight -inc 1"), desc='Raise Backlight'),
+    Key([mod], "s", switch_audio()),
 
-    Key([], "XF86AudioPlay", lazy.spawn("dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"), desc='Resume/Pause Spotify'),
-    Key([], "XF86AudioNext", lazy.spawn("dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next"), desc='Next song in Spotify'),
-    Key([], "XF86AudioPrev", lazy.spawn("dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Prev"), desc='Previous song in Spotify')
+    # Launch
+
+    Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
+    Key([mod], "Space", lazy.spawn(launcher), desc="Launch launcher"),
+    Key([mod], "w", lazy.spawn(show_windows), desc="Shows open windows"),
+    Key([mod], "b", lazy.spawn(browser), desc="Launch browser"),
+    Key([mod], "e", lazy.spawn(file_manager), desc="Launch file manager"),
+    Key([mod], "F4", lazy.spawn(powermenu), desc="Launch powermenu"),
+    
+    # Qtile
+    
+    Key([mod, "shift"], "r", lazy.reload_config(), desc="Reload the config"),
+    Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
+
+    # Screenshot
+
+    Key([], "Print", screenshot(mode="gui"), desc="Take a screenshot"),
+    Key([mod], "Print", screenshot(mode="screen"), desc="Take a screenshot of a zone or a window"),
+    
 ]
 
-groups = []
-group_names = ["1", "2", "3", "4"]
-group_labels = ["Code", "WWW", "Music", "Other"]
+### GROUPS ###
 
-for i in range(len(group_names)):
-    groups.append(
-        Group(
-            name=group_names[i],
-            label=group_labels[i]
-        ))
+groups = [
+    Group(name="1", label="●", screen_affinity=0),
+    Group(name="2", label="●", screen_affinity=0),
+    Group(name="3", label="●", screen_affinity=1),
+    Group(name="4", label="●", screen_affinity=1),
+]
+
+
+def go_to_group(name: str):
+    def _inner(qtile):
+        if len(qtile.screens) == 1:
+            qtile.groups_map[name].toscreen()
+            return
+
+        if name in '12':
+            qtile.focus_screen(0)
+            qtile.groups_map[name].toscreen()
+        else:
+            qtile.focus_screen(1)
+            qtile.groups_map[name].toscreen()
+
+    return _inner
 
 for i in groups:
-    keys.extend(
-        [
-            # mod1 + letter of group = switch to group
-            Key(
-                [mod],
-                i.name,
-                lazy.group[i.name].toscreen(),
-                desc="Switch to group {}".format(i.name),
-            ),
-            # mod1 + shift + letter of group = move focused window to group
-            Key(
-                [mod, "shift"],
-                i.name,
-                lazy.window.togroup(i.name, switch_group=False),
-                desc="Move focused window to group {}".format(i.name),
-            ),
-        ]
-    )
+    keys.append(Key([mod], i.name, lazy.function(go_to_group(i.name))))
 
-colors = colors.DoomOne
+def go_to_group_and_move_window(name: str):
+    def _inner(qtile):
+        if len(qtile.screens) == 1:
+            qtile.current_window.togroup(name, switch_group=False)
+            return
 
-layout_theme = {"border_width": 3,
-                "margin": 3,
-                "border_focus": colors[7],
-                "border_normal": colors[0]
-                }
+        if name in "12":
+            qtile.current_window.togroup(name, switch_group=False)
+            qtile.focus_screen(0)
+            qtile.groups_map[name].toscreen()
+        else:
+            qtile.current_window.togroup(name, switch_group=False)
+            qtile.focus_screen(1)
+            qtile.groups_map[name].toscreen()
 
-layouts = [
-    #layout.Bsp(**layout_theme),
-    #layout.Floating(**layout_theme)
-    #layout.RatioTile(**layout_theme),
-    #layout.VerticalTile(**layout_theme),
-    #layout.Matrix(**layout_theme),
-    layout.MonadTall(**layout_theme),
-    #layout.MonadWide(**layout_theme),
-    #layout.Tile(
-    #     shift_windows=True,
-    #     border_width = 0,
-    #     margin = 0,
-    #     ratio = 0.335,
-    #     ),
-    layout.Max(
-         border_width = 0,
-         margin = 0,
-         ),
-    #layout.Stack(**layout_theme, num_stacks=2),
-    #layout.Columns(**layout_theme),
-    #layout.TreeTab(
-    #     font = "Ubuntu Bold",
-    #     fontsize = 11,
-    #     border_width = 0,
-    #     bg_color = colors[0],
-    #     active_bg = colors[8],
-    #     active_fg = colors[2],
-    #     inactive_bg = colors[1],
-    #     inactive_fg = colors[0],
-    #     padding_left = 8,
-    #     padding_x = 8,
-    #     padding_y = 6,
-    #     sections = ["ONE", "TWO", "THREE"],
-    #     section_fontsize = 10,
-    #     section_fg = colors[7],
-    #     section_top = 15,
-    #     section_bottom = 15,
-    #     level_shift = 8,
-    #     vspace = 3,
-    #     panel_width = 240
-    #     ),
-    #layout.Zoomy(**layout_theme),
-]
+    return _inner
+
+for i in groups:
+    keys.append(Key([mod, "shift"], i.name, lazy.function(go_to_group_and_move_window(i.name))))
+
+### WIDGETS ###
 
 widget_defaults = dict(
-    font="Mononoki Nerd Font",
-    fontsize = 18,
-    padding = 0,
-    background=colors[0]
+    font=bar_font,
+    foreground=bar_foreground_color,
+    fontsize=bar_fontsize,
 )
 
 extension_defaults = widget_defaults.copy()
 
-def get_battery_icon_dischargeing(percent):
-    if percent >= 0.9:
-        return "󰂂 "
-    if percent >= 0.8:
-        return "󰂁 "
-    if percent >= 0.7:
-        return "󰂀 "
-    if percent >= 0.6:
-        return "󰁿 "
-    if percent >= 0.5:
-        return "󰁾 "
-    if percent >= 0.4:
-        return "󰁽 "
-    if percent >= 0.3:
-        return "󰁼 "
-    if percent >= 0.2:
-        return "󰁻 "
-    return "󰁺 "
-
-def get_battery_icon_chargeing(percent):
-    if percent >= 0.9:
-        return "󰂋 "
-    if percent >= 0.8:
-        return "󰂊 "
-    if percent >= 0.7:
-        return "󰢞 "
-    if percent >= 0.6:
-        return "󰂉 "
-    if percent >= 0.5:
-        return "󰢝 "
-    if percent >= 0.4:
-        return "󰂈 "
-    if percent >= 0.3:
-        return "󰂇 "
-    if percent >= 0.2:
-        return "󰂆 "
-    return "󰢜 "
-
-def init_widgets_list():
-    spacer = widget.TextBox(
-                 text = ' | ',
-                 foreground = colors[1],
-                 padding = 2,
-                 )
-    widgets_list = [
-        widget.GroupBox(
-                 margin_y = 5,
-                 margin_x = 5,
-                 padding_y = 0,
-                 padding_x = 2,
-                 borderwidth = 3,
-                 active = colors[1],
-                 inactive = colors[1],
-                 rounded = True,
-                 highlight_color = colors[0],
-                 highlight_method = "line",
-                 this_current_screen_border = colors[1],
-                 this_screen_border = colors [1],
-                 other_current_screen_border = colors[7],
-                 other_screen_border = colors[7],
-                 ),
-        widget.TextBox(
-                 text = '| ',
-                 foreground = colors[1],
-                 padding = 2,
-                 ),
-        widget.WindowName(
-                 foreground = colors[6],
-                 max_chars = 40
-                 ),
-        widget.CPU(
-                 format = '  {load_percent}%',
-                 foreground = colors[4],
-                 ),
-        spacer,
-        widget.Memory(
-                 foreground = colors[8],
-                 format = '{MemUsed: .0f}{mm}',
-                 fmt = '  {} / 16G'
-                 ),
-        spacer,
-        widget.DF(
-                 update_interval = 60,
-                 foreground = colors[5],
-                 partition = '/',
-                 format = '{uf}{m} free',
-                 fmt = '  {}',
-                 visible_on_warn = False,
-                 ),
-        spacer,
-        widget.PulseVolume(
-                 foreground = colors[7],
-                 fmt = '{}',
-                 emoji = True,
-                 emoji_list = ["󰝟 ", "󰕿 ", "󰖀 ", "󰕾 "],
-                 fontsize = 25
-                 #get_volume_command = "amixer get Master",
-                 #volume_app = "amixer",
-                 #mute_format = "hi",
-                 #unmute_format = 'Vol: {}',
-                 #mute_command = "pamixer -t",
-                 #check_mute_command = "pamixer --get-mute",
-                 #check_mute_string = ['true']
-                 ),
-        widget.PulseVolume(
-                 foreground = colors[7],
-                 fmt = '{}',
-                 # emoji = True,
-                 # emoji_list = ["󰝟 ", "󰕿 ", "󰖀 ", "󰕾 "]
-                 #get_volume_command = "amixer get Master",
-                 #volume_app = "amixer",
-                 #mute_format = "hi",
-                 #unmute_format = 'Vol: {}',
-                 #mute_command = "pamixer -t",
-                 #check_mute_command = "pamixer --get-mute",
-                 #check_mute_string = ['true']
-                 ),
-        spacer,
-        widget.Battery(
-            full_char="󰁹 ",
-            format="{char}{percent:2.0%}",
-            update_interval=10,
-            # mouse_callbacks = {'Button1': lazy.widget["battery"].force_update()}
-        ),
-        spacer,
-        widget.Bluetooth(
-                 default_text = "BT Devices connected: {num_connected_devices}",
-                 default_show_battery = True,
-                 default_timeout = 10
-        ),
-        spacer,
-        widget.Clock(
-                 foreground = colors[8],
-                 format = "%a, %b %d - %H:%M",
-                 ),
-        widget.TextBox(
-                 text = ' ',
-                 foreground = colors[1],
-                 padding = 3,
-                 ),
-        widget.Systray(),
+# Decorations
+powerlineR = {
+    "decorations": [
+        widget.decorations.PowerLineDecoration(path="back_slash")
     ]
+}
 
-    # Battery
-    battery = widgets_list[12]
-    battery_percent = battery._battery.update_status().percent
-    battery.discharge_char = get_battery_icon_dischargeing(battery_percent)
-    battery.charge_char = get_battery_icon_chargeing(battery_percent)
-    return widgets_list
+powerlineL = {
+    "decorations": [
+        widget.decorations.PowerLineDecoration(path="forward_slash")
+    ]
+}
 
-# For adding transparency to your bar, add (background="#00000000") to the "Screen" line(s)
-# For ex: Screen(top=bar.Bar(widgets=init_widgets_screen2(), background="#00000000", size=24)),
+screen1 = [
+    widget.TextBox(
+        padding = 5,
+        background=theme['alt_background']
+    ),
 
-if __name__ in ["config", "__main__"]:
-    temp = init_widgets_list()
-    #Screen(top=bar.Bar(widgets=temp[:16], size=26))
-    screens = [Screen(top=bar.Bar(widgets=temp, size=26)),
-               Screen(top=bar.Bar(widgets=temp[:18], size=26))]
+    widget.GroupBox(
+        fontsize=20,
+        border_width=3,
+
+        inactive=theme['disabled'],
+        active=theme['accent'],
+
+        highlight_color=bar_background_color,
+        highlight_method="line",
+        this_current_screen_border = group_highlight_color,
+        this_screen_border = group_highlight_color,
+
+        padding=10,
+        **powerlineR,
+        background=theme['alt_background'],
+        visible_groups=['1', '2']
+    ),
+
+    widget.TextBox(
+        text=" ",
+        padding = 0,
+        **powerlineR,
+        background=theme['alt_background'],
+    ),
+
+    widget.CurrentLayoutIcon(
+        padding = 10
+    ),
+
+    widget.WindowName(
+        foreground=bar_foreground_color, 
+        padding=20
+    ),
+
+    widget.CPU(
+        format="{load_percent}%",
+        fmt=" 󰍛   {} ",
+        **powerlineL,
+        background=theme['background']
+    ),
+
+    widget.Memory(
+        measure_mem="G",
+        format="   {MemUsed: .2f}{mm} /{MemTotal: .2f}{mm} ",
+        **powerlineL,
+        background=theme['alt_background']
+    ),
+
+    widget.Clock(
+        format=" %A %d %B %Y %H:%M ",
+    ),
+
+    widget.Systray(),
+
+    widget.TextBox(
+        **powerlineL,
+        background=theme['background']
+    ),
+
+    widget.TextBox(
+        ' ⏻',
+        mouse_callbacks={
+            'Button1': lazy.spawn(powermenu)
+        },
+        **powerlineL,
+        background=theme['alt_background']
+    ),
+
+    widget.TextBox(
+        padding = 0,
+        background=theme['alt_background']
+    ),
+]
+
+screen2 = [
+    widget.TextBox(
+        padding = 5,
+        background=theme['alt_background']
+    ),
+
+    widget.GroupBox(
+        fontsize=20,
+        border_width=3,
+
+        inactive=theme['disabled'],
+        active=theme['accent'],
+
+        highlight_color=bar_background_color,
+        highlight_method="line",
+        this_current_screen_border = group_highlight_color,
+        this_screen_border = group_highlight_color,
+
+        padding=10,
+        **powerlineR,
+        background=theme['alt_background'],
+        visible_groups=['3', '4']
+    ),
+
+    widget.TextBox(
+        text=" ",
+        padding = 0,
+        **powerlineR,
+        background=theme['alt_background'],
+    ),
+
+    widget.CurrentLayoutIcon(
+        padding = 10
+    ),
+
+    widget.WindowName(
+        foreground=bar_foreground_color, 
+        padding=20
+    ),
+
+    widget.Clock(
+        format=" %A %d %B %Y %H:%M ",
+    )
+]
+
+### SCREENS ###
+
+screens = [
+    Screen(
+        top=bar.Bar(
+            widgets= screen1,
+            size=bar_size,
+            background = bar_background_color,
+            margin = [bar_top_margin, bar_right_margin, bar_bottom_margin-layouts_margin, bar_left_margin],
+        ),
+    ),
+
+    Screen(
+        top=bar.Bar(
+            widgets= screen2,
+            size=bar_size,
+            background = bar_background_color,
+            margin = [bar_top_margin, bar_right_margin, bar_bottom_margin-layouts_margin, bar_left_margin],
+        ),
+    ),
+]
+
+### MOUSE ###
 
 mouse = [
     Drag([mod], "Button1", lazy.window.set_position_floating(), start=lazy.window.get_position()),
@@ -375,59 +352,39 @@ mouse = [
     Click([mod], "Button2", lazy.window.bring_to_front()),
 ]
 
+### OTHER SETTINGS ###
+
 dgroups_key_binder = None
-dgroups_app_rules = []  # type: list
+dgroups_app_rules: list = []
 follow_mouse_focus = False
 bring_front_click = False
+floats_kept_above = True
 cursor_warp = False
 floating_layout = layout.Floating(
-    border_focus=colors[8],
-    border_width=2,
+    **layout_theme,
     float_rules=[
-        # Run the utility of `xprop` to see the wm class and name of an X client.
         *layout.Floating.default_float_rules,
-        Match(wm_class="confirmreset"),   # gitk
-        # Match(wm_class="dialog"),         # dialog boxes
-        # Match(wm_class="download"),       # downloads
-        # Match(wm_class="error"),          # error msgs
-        # Match(wm_class="file_progress"),  # file progress boxes
-        # Match(wm_class='kdenlive'),       # kdenlive
-        Match(wm_class="makebranch"),     # gitk
-        Match(wm_class="maketag"),        # gitk
-        # Match(wm_class="notification"),   # notifications
-        # Match(wm_class='pinentry-gtk-2'), # GPG key password entry
-        # Match(wm_class="ssh-askpass"),    # ssh-askpass
-        # Match(wm_class="toolbar"),        # toolbars
-        # Match(wm_class="Yad"),            # yad boxes
-        Match(title="branchdialog"),      # gitk
-        # Match(title='Confirmation'),      # tastyworks exit box
-        # Match(title='Qalculate!'),        # qalculate-gtk
-        # Match(title="pinentry"),          # GPG key password entry
-        # Match(title="tastycharts"),       # tastytrade pop-out charts
-        # Match(title="tastytrade"),        # tastytrade pop-out side gutter
-        # Match(title="tastytrade - Portfolio Report"), # tastytrade pop-out allocation
-        # Match(wm_class="tasty.javafx.launcher.LauncherFxApp"), # tastytrade settings
+        Match(wm_class="confirmreset"),  # gitk
+        Match(wm_class="makebranch"),  # gitk
+        Match(wm_class="maketag"),  # gitk
+        Match(wm_class="ssh-askpass"),  # ssh-askpass
+        Match(title="branchdialog"),  # gitk
+        Match(title="pinentry"),  # GPG key password entry,
+        *[Match(wm_class=app) for app in floating_apps]
     ]
 )
+
 auto_fullscreen = True
 focus_on_window_activation = "smart"
 reconfigure_screens = True
-
-# If things like steam games want to auto-minimize themselves when losing
-# focus, should we respect this or not?
 auto_minimize = True
 
-@hook.subscribe.startup_once
-def start_once():
-    home = os.path.expanduser('~')
-    subprocess.call([home + '/.config/qtile/autostart.sh'])
+### HOOKS ###
 
-# XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
-# string besides java UI toolkits; you can see several discussions on the
-# mailing lists, GitHub issues, and other WM documentation that suggest setting
-# this string if your java app doesn't work correctly. We may as well just lie
-# and say that we're a working one by default.
-#
-# We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
-# java that happens to be on java's whitelist.
-wmname = "LG3D"
+ready = False
+
+@hook.subscribe.startup_once
+def _():
+    run(autostart_file)
+
+wmname = "qtile"

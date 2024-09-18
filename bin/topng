@@ -1,0 +1,16 @@
+
+
+while getopts ":a" option; do
+   case $option in
+      a) 
+        for i in *.*
+        do
+            filename=$(basename -- "$i")
+            filename="${filename%.*}"
+            magick "$i" "$filename.png"
+            rm "$i"
+            echo "Convertet $i to $filename.png"
+        done
+        exit;;
+   esac
+done
