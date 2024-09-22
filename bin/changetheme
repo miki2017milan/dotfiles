@@ -1,0 +1,16 @@
+#!/bin/bash
+choice="$(printf " Arch\0icon\x1farch\n Anime Girl\0icon\x1fanime_rain" | rofi -dmenu -show-icons -p  "What theme would you like to use?")"
+
+case "$choice" in
+" Arch")
+    sed -i '/from themes import/c\from themes import arch as theme' ~/.config/qtile/variables.py
+    qtile cmd-obj -o cmd -f reload_config
+    ;;
+" Anime Girl")
+    sed -i '/from themes import/c\from themes import anime_girl as theme' ~/.config/qtile/variables.py
+    qtile cmd-obj -o cmd -f reload_config
+    ;;
+*) err "Invalid choice" ;;
+esac
+
+# sed -i '/from themes import/c\from themes import '"$1"' as theme' ~/.config/qtile/variables.py

@@ -212,8 +212,8 @@ screen1 = [
 
         highlight_color=bar_background_color,
         highlight_method="line",
-        this_current_screen_border = group_highlight_color,
-        this_screen_border = group_highlight_color,
+        this_current_screen_border = theme['alt_background'],
+        this_screen_border = theme['alt_background'],
 
         padding=10,
         **powerlineR,
@@ -292,8 +292,8 @@ screen2 = [
 
         highlight_color=bar_background_color,
         highlight_method="line",
-        this_current_screen_border = group_highlight_color,
-        this_screen_border = group_highlight_color,
+        this_current_screen_border = theme['alt_background'],
+        this_screen_border = theme['alt_background'],
 
         padding=10,
         **powerlineR,

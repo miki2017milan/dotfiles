@@ -1,0 +1,4 @@
+#!/bin/bash
+
+wallpaper="$(sxiv -t -o ~/wallpapers)"
+feh --bg-fill $wallpaper

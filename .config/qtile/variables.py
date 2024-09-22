@@ -1,6 +1,5 @@
 ### THEME ###
-
-from themes import catppuccin_mocha as theme
+from themes import arch as theme
 
 group_highlight_color = '#cd49b9'
 
@@ -10,8 +9,8 @@ mod = "mod4"
 terminal = "alacritty"
 browser = "firefox"
 file_manager = None 
-launcher = "rofi -show drun"
-show_windows = "rofi -show window"
+launcher = "rofi -show drun -show-icons"
+show_windows = "rofi -show window -show-icons"
 powermenu = "rofi -show menu -modi 'menu:~/.config/rofi/scripts/rofi-power-menu --choices=shutdown/reboot' -config ~/.config/rofi/power.rasi"
 screenshots_path = "~/screenshots/" # creates if doesn't exists
 autostart_file = "~/.config/qtile/autostart.sh"

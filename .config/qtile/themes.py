@@ -1,9 +1,17 @@
-catppuccin_mocha = {
+arch = {
     'foreground': '#cdd6f4',
     'background': '#1e1e2e',
     'alt_background': '#131320',
-    'disabled': '#313244',
+    'disabled': '#cdd6f4',
     'accent': '#89b4fA',
+}
+
+anime_girl = {
+    'foreground': '#fde5f9',
+    'background': '#453e68',
+    'alt_background': '#995ea6',
+    'disabled': '#fde5f9',
+    'accent': '#d98ec7',
 }
 
 catppuccin_machiatto = {
