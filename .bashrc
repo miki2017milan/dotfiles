@@ -1,5 +1,5 @@
 ### EXPORT
-export LC_ALL=C
+export LC_ALL=C # For keyboard layout
 export PATH="$HOME/bin:$PATH"
 
 # If not running interactively, don't do anything
@@ -12,8 +12,10 @@ export PATH="$HOME/bin:$PATH"
 bind "set completion-ignore-case on"
 
 ### ALIASES ###
-# navigation
+# Navigation
 alias ..='cd ..'
+
+# Easy names
 alias img='sxiv'
 
 # fzf
@@ -33,13 +35,14 @@ alias grep='grep --color=auto' # colorize output (good for log files)
 # Change your default USER shell
 alias tobash="sudo chsh $USER -s /bin/bash && echo 'Log out and log back in for change to take effect.'"
 alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Log out and log back in for change to take effect.'"
-alias tofish="sudo chsh $USER -s /bin/fish && echo 'Log out and log back in for change to take effect.'"
 
 # Asthetic terminal things
 alias rr='curl -s -L https://raw.githubusercontent.com/keroserene/rickrollrc/master/roll.sh | bash'
 alias pipes='pipes.sh -t 4 -f 100'
+alias matrix='cmatrix -u 1 -r'
 
 ### SETTING THE STARSHIP PROMPT ###
 eval "$(starship init bash)"
+eval "$(zoxide init --cmd cd bash)"
 
 neofetch

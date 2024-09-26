@@ -5,18 +5,23 @@ group_highlight_color = '#cd49b9'
 
 ### GENERAL ###
 
+# Apps
 mod = "mod4"
 terminal = "alacritty"
 browser = "firefox"
 file_manager = None 
+
+# Rofi
 launcher = "rofi -show drun -show-icons"
 show_windows = "rofi -show window -show-icons"
 powermenu = "rofi -show menu -modi 'menu:~/.config/rofi/scripts/rofi-power-menu --choices=shutdown/reboot' -config ~/.config/rofi/power.rasi"
+
+# Paths
 screenshots_path = "~/screenshots/" # creates if doesn't exists
 autostart_file = "~/.config/qtile/autostart.sh"
 
 floating_apps = [
-    'nitrogen',
+    'sxiv',
 ]
 
 ### LAYOUTS ###

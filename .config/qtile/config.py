@@ -1,15 +1,15 @@
 ### IMPORTS ###
 import sys
-import subprocess
-from os.path import expanduser, exists, normpath, getctime
+
+from os import system, makedirs
+from os.path import expanduser, exists
+
 from subprocess import run
-from os import system, listdir, makedirs
-from datetime import datetime
-from libqtile import layout, qtile, hook, bar, core
+
+from libqtile import layout, hook, bar
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from qtile_extras import widget
-from json import dump, load
 
 sys.path.append(expanduser('~/.config/qtile'))
 
@@ -235,6 +235,22 @@ screen1 = [
     widget.WindowName(
         foreground=bar_foreground_color, 
         padding=20
+    ),
+
+    widget.TextBox(
+        text=" ",
+        padding = 0,
+        **powerlineL,
+        background=theme['background'],
+    ),
+
+    widget.CheckUpdates(
+        colour_no_updates=bar_foreground_color,
+        colour_have_updates=bar_foreground_color,
+        no_update_string='No updates',
+        **powerlineL,
+        background=theme['alt_background'],
+        padding=10
     ),
 
     widget.CPU(
