@@ -3,14 +3,10 @@ Version=1.0
 Type=Application
 NoDisplay=false
 Name=Change Theme
-GenericName=X compositor
-Comment=An X compositor
 Categories=Utility;
-Keywords=compositor;composite manager;window effects;transparency;opacity;
 TryExec=changetheme
 Exec=changetheme
 StartupNotify=false
 Terminal=false
-# Thanks to quequotion for providing this file!
 Icon=gtk-theme-config
 NoDisplay=false
