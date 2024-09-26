@@ -279,12 +279,29 @@ screen1 = [
         background=theme['background']
     ),
 
-    widget.Battery(
-        discharge_char="󰂀",
-        charge_char="󰢞",
-        format="  {char} {percent:2.0%}",
+    widget.TextBox(
+        text=" ",
         **powerlineL,
         background=theme['alt_background'],
+        padding = 0
+    ),
+
+    widget.BatteryIcon(
+        theme_path = '~/.local/share/icons/qtile-battery',
+        scale = 2,
+        **powerlineL,
+        background=theme['alt_background'],
+        update_interval = 5,
+        padding = 0
+    ),
+
+    widget.Battery(
+        discharge_char="",
+        charge_char="",
+        format="{percent:2.0%}  ",
+        **powerlineL,
+        background=theme['alt_background'],
+        padding = 0
         # padding=5
     ),
 
