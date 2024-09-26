@@ -4,13 +4,15 @@ separator_color= frame
 scale = 1.2
 icon_corner_radius = 5
 font = "Mononoki Nerd Font 12"
-icon_theme = "Papirus-Dark"
+# icon_theme = Papirus
+# enable_recursive_icon_lookup = true
 origin = top-right
 offset = 0
 frame_width = 4
 corners = all
 corner_radius = 10
 progress_bar = true
+icon_path = /home/milan/.local/share/icons/dunst
 
 [urgency_low]
 background = "#1e1e2eb0"
