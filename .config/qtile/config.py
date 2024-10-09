@@ -102,6 +102,9 @@ keys = [
     Key([], "XF86AudioPlay", lazy.spawn('playerctl play-pause')),
     Key([], "XF86AudioPrev", lazy.spawn('playerctl previous')),
     Key([], "XF86AudioNext", lazy.spawn('playerctl next')),
+    Key([], "XF86MonBrightnessUp", lazy.spawn('sudo xbacklight -inc 5')),
+    Key([], "XF86MonBrightnessDown", lazy.spawn('sudo xbacklight -dec 5')),
+    
 
     # Key([mod], "s", switch_audio()),
 
@@ -157,7 +160,7 @@ for i in groups:
 def go_to_group_and_move_window(name: str):
     def _inner(qtile):
         if len(qtile.screens) == 1:
-            qtile.current_window.togroup(name, switch_group=False)
+            qtile.current_window.togroup(name, switch_group=True)
             return
 
         if name in "12":
@@ -244,20 +247,6 @@ screen1 = [
     ),
 
     widget.Systray(),
-
-    widget.TextBox(
-        **powerlineL,
-        background=theme['background']
-    ),
-
-    widget.CheckUpdates(
-        colour_no_updates=bar_foreground_color,
-        colour_have_updates=bar_foreground_color,
-        no_update_string="No updates",
-        **powerlineL,
-        background=theme['alt_background'],
-        padding=10
-    ),
 
     widget.CPU(
         format="{load_percent}%",

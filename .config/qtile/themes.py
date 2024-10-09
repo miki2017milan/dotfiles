@@ -1,6 +1,6 @@
 arch = {
     'foreground': '#cdd6f4',
-    'background': '#1e1e2e',
+    'background': '#2e2e3e',
     'alt_background': '#131320',
     'disabled': '#cdd6f4',
     'accent': '#89b4fA',

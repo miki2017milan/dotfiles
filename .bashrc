@@ -36,6 +36,10 @@ alias grep='grep --color=auto' # colorize output (good for log files)
 alias tobash="sudo chsh $USER -s /bin/bash && echo 'Log out and log back in for change to take effect.'"
 alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Log out and log back in for change to take effect.'"
 
+# Uni Passau
+alias uniconn='sudo openvpn --cd ~/.openvpn/config/client/ --disable-dco --config stud-ext.ovpn'
+alias uniconnpub='sudo openvpn --cd ~/.openvpn/config/client/ --disable-dco --config stud-pub.ovpn'
+
 # Asthetic terminal things
 alias rr='curl -s -L https://raw.githubusercontent.com/keroserene/rickrollrc/master/roll.sh | bash'
 alias pipes='pipes.sh -t 4 -f 100'
