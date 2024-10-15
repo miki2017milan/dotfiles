@@ -16,7 +16,16 @@ screenshots_path = "~/screenshots/" # creates if doesn't exists
 autostart_file = "~/.config/qtile/autostart.sh"
 
 floating_apps = [
-    'nitrogen',
+    'sxiv',
+]
+
+floating_names = [
+    "Preferences ",
+    "Eclipse IDE Launcher ",
+    "New Java Project ",
+    "Delete ",
+    "New Java Package ",
+    "New Java Class "
 ]
 
 ### LAYOUTS ###
