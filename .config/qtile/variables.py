@@ -24,6 +24,15 @@ floating_apps = [
     'sxiv',
 ]
 
+floating_names = [
+    "Preferences ",
+    "Eclipse IDE Launcher ",
+    "New Java Project ",
+    "Delete ",
+    "New Java Package ",
+    "New Java Class "
+]
+
 ### LAYOUTS ###
 
 layouts = [
@@ -32,7 +41,7 @@ layouts = [
 ]
 
 layouts_margin = 7
-layouts_border_width = 2
+layouts_border_width = 4
 layouts_border_color = theme['disabled']
 layouts_border_focus_color = theme['accent']
 layouts_border_on_single = True

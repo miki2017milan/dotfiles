@@ -69,6 +69,8 @@ def screenshot(_qtile, mode):
 def switch_audio(_qtile):
     system("sh ~/.config/qtile/scripts/switch_audio.sh")
 
+print(launcher)
+
 keys = [
     # Window Management
 
@@ -386,6 +388,7 @@ floating_layout = layout.Floating(
         Match(wm_class="ssh-askpass"),  # ssh-askpass
         Match(title="branchdialog"),  # gitk
         Match(title="pinentry"),  # GPG key password entry,
+        *[Match(title=app) for app in floating_names],
         *[Match(wm_class=app) for app in floating_apps]
     ]
 )

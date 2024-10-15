@@ -17,12 +17,14 @@ alias ..='cd ..'
 
 # Easy names
 alias img='sxiv'
+alias pdf='zathura'
 
 # fzf
 alias cdf='cd $(fzf --walker dir,hidden)'
 alias vimf='vim $(fzf)'
 alias catf='cat $(fzf)'
 alias imgf='sxiv $(fzf)'
+alias pdff='zathura $(fzf)'
 
 # Better ls with eza
 alias ls='eza -l'
@@ -35,6 +37,9 @@ alias grep='grep --color=auto' # colorize output (good for log files)
 # Change your default USER shell
 alias tobash="sudo chsh $USER -s /bin/bash && echo 'Log out and log back in for change to take effect.'"
 alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Log out and log back in for change to take effect.'"
+
+# Uni Passau
+alias uniconn='sudo openvpn --cd ~/.openvpn/config/client --disable-dco --config stud-ext.ovpn'
 
 # Asthetic terminal things
 alias rr='curl -s -L https://raw.githubusercontent.com/keroserene/rickrollrc/master/roll.sh | bash'
