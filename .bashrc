@@ -17,6 +17,7 @@ alias ..='cd ..'
 
 # Easy names
 alias img='sxiv'
+alias toclip='xclip -selection clipboard'
 
 # fzf
 alias cdf='cd $(fzf --walker dir,hidden)'
@@ -50,3 +51,5 @@ eval "$(starship init bash)"
 eval "$(zoxide init --cmd cd bash)"
 
 neofetch
+
+[ -f "/home/milan/.ghcup/env" ] && . "/home/milan/.ghcup/env" # ghcup-env

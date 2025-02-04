@@ -5,10 +5,10 @@ from os.path import expanduser, exists, normpath, getctime
 from subprocess import run
 from os import system, listdir, makedirs
 from datetime import datetime
-from libqtile import layout, qtile, hook, bar, core
-from libqtile.config import Click, Drag, Group, Key, Match, Screen
-from libqtile.lazy import lazy
-from qtile_extras import widget
+from libqtile import layout, qtile, hook, bar, core # type: ignore
+from libqtile.config import Click, Drag, Group, Key, Match, Screen # type: ignore
+from libqtile.lazy import lazy # type: ignore
+from qtile_extras import widget # type: ignore
 from json import dump, load
 
 sys.path.append(expanduser('~/.config/qtile'))
@@ -80,6 +80,9 @@ keys = [
     Key([mod, "shift"], "right", lazy.layout.shuffle_right(), desc="Move window to the right"),
     Key([mod, "shift"], "down", lazy.layout.shuffle_down(), desc="Move window down"),
     Key([mod, "shift"], "up", lazy.layout.shuffle_up(), desc="Move window up"),
+
+    Key([mod], "right", lazy.screen.next_group(skip_empty=True), desc="Move to next workspace"),
+    Key([mod], "left", lazy.screen.prev_group(skip_empty=True), desc="Move to prev workspace"),
 
     Key([mod], "period", lazy.next_screen(), desc='Move focus to next monitor'),
 
@@ -187,7 +190,6 @@ widget_defaults = dict(
 
 extension_defaults = widget_defaults.copy()
 
-# Decorations
 powerlineR = {
     "decorations": [
         widget.decorations.PowerLineDecoration(path="back_slash")
@@ -217,6 +219,7 @@ screen1 = [
         highlight_method="line",
         this_current_screen_border = theme['alt_background'],
         this_screen_border = theme['alt_background'],
+        visible_groups = ['1', '2'] if len(qtile.screens) == 1 else ['1', '2', '3', '4'],
 
         padding=10,
         **powerlineR,
@@ -290,8 +293,8 @@ screen1 = [
         format="{percent:2.0%}  ",
         **powerlineL,
         background=theme['alt_background'],
-        padding = 0
-        # padding=5
+        padding = 0,
+        update_interval = 5,
     ),
 
     widget.TextBox(
@@ -300,59 +303,59 @@ screen1 = [
             'Button1': lazy.spawn(powermenu)
         },
         **powerlineL,
-        background=theme['alt_background']
+        background=theme['background']
     ),
 
     widget.TextBox(
         padding = 0,
-        background=theme['alt_background']
+        background=theme['background']
     ),
 ]
 
-# screen2 = [
-#     widget.TextBox(
-#         padding = 5,
-#         background=theme['alt_background']
-#     ),
+screen2 = [
+    widget.TextBox(
+        padding = 5,
+        background=theme['alt_background']
+    ),
 
-#     widget.GroupBox(
-#         fontsize=20,
-#         border_width=3,
+    widget.GroupBox(
+        fontsize=20,
+        border_width=3,
 
-#         inactive=theme['disabled'],
-#         active=theme['accent'],
+        inactive=theme['disabled'],
+        active=theme['accent'],
 
-#         highlight_color=bar_background_color,
-#         highlight_method="line",
-#         this_current_screen_border = theme['alt_background'],
-#         this_screen_border = theme['alt_background'],
+        highlight_color=bar_background_color,
+        highlight_method="line",
+        this_current_screen_border = theme['alt_background'],
+        this_screen_border = theme['alt_background'],
 
-#         padding=10,
-#         **powerlineR,
-#         background=theme['alt_background'],
-#         visible_groups=['3', '4']
-#     ),
+        padding=10,
+        **powerlineR,
+        background=theme['alt_background'],
+        visible_groups=['3', '4']
+    ),
 
-#     widget.TextBox(
-#         text=" ",
-#         padding = 0,
-#         **powerlineR,
-#         background=theme['alt_background'],
-#     ),
+    widget.TextBox(
+        text=" ",
+        padding = 0,
+        **powerlineR,
+        background=theme['alt_background'],
+    ),
 
-#     widget.CurrentLayoutIcon(
-#         padding = 10
-#     ),
+    widget.CurrentLayoutIcon(
+        padding = 10
+    ),
 
-#     widget.WindowName(
-#         foreground=bar_foreground_color, 
-#         padding=20
-#     ),
+    widget.WindowName(
+        foreground=bar_foreground_color, 
+        padding=20
+    ),
 
-#     widget.Clock(
-#         format=" %A %d %B %Y %H:%M ",
-#     )
-# ]
+    widget.Clock(
+        format=" %A %d %B %Y %H:%M ",
+    )
+]
 
 ### SCREENS ###
 
@@ -366,14 +369,14 @@ screens = [
         ),
     ),
 
-    # Screen(
-    #     top=bar.Bar(
-    #         widgets= screen2,
-    #         size=bar_size,
-    #         background = bar_background_color,
-    #         margin = [bar_top_margin, bar_right_margin, bar_bottom_margin-layouts_margin, bar_left_margin],
-    #     ),
-    # ),
+    Screen(
+        top=bar.Bar(
+            widgets= screen2,
+            size=bar_size,
+            background = bar_background_color,
+            margin = [bar_top_margin, bar_right_margin, bar_bottom_margin-layouts_margin, bar_left_margin],
+        ),
+    ),
 ]
 
 ### MOUSE ###
