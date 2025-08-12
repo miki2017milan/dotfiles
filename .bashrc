@@ -29,6 +29,10 @@ alias imgf='sxiv $(fzf)'
 alias ls='eza -l'
 alias la='eza -la'
 
+# Bluetooth airpods
+alias yoo='bluetoothctl connect 80:95:3A:D8:38:F5'
+alias karlmax='bluetoothctl connect 08:FF:44:06:53:96'
+
 # Adding flags
 alias df='df -h'               # human-readable sizes
 alias grep='grep --color=auto' # colorize output (good for log files)
