@@ -19,40 +19,27 @@ all=(shutdown reboot)
 show=("${all[@]}")
 
 declare -A texts
-texts[lockscreen]="lock screen"
-texts[switchuser]="switch user"
-texts[logout]="log out"
-texts[suspend]="suspend"
-texts[hibernate]="hibernate"
-texts[reboot]="reboot"
-texts[shutdown]="shut down"
+texts[reboot]="Reboot "
+texts[shutdown]="Shutdown "
 
 declare -A icons
-icons[lockscreen]="\Uf033e"
-icons[switchuser]="\Uf0019"
-icons[logout]="\Uf0343"
-icons[suspend]="\Uf04b2"
-icons[hibernate]="\Uf02ca"
-icons[reboot]="  "
-icons[shutdown]=" ⏻ "
-icons[cancel]="\Uf0156"
+
+icons[reboot]=""
+icons[shutdown]=""
+icons[cancel]="󰜺"
 
 declare -A actions
-actions[lockscreen]="loginctl lock-session ${XDG_SESSION_ID-}"
-#actions[switchuser]="???"
-actions[logout]="qtile cmd-obj -o cmd -f shutdown"
-actions[suspend]="sudo systemctl suspend"
-actions[hibernate]="sudo systemctl hibernate"
+
 actions[reboot]="reboot"
 actions[shutdown]="shutdown now"
 
 # By default, ask for confirmation for actions that are irreversible
-confirmations=()
+confirmations=(reboot shutdown)
 
 # By default, no dry run
 dryrun=false
 showsymbols=true
-showtext=false
+showtext=true
 
 function check_valid {
     option="$1"
@@ -187,7 +174,7 @@ function write_message {
     then
         if [ "$showtext" = "true" ]
         then
-            echo -n "$icon"
+            echo -n "$icon $text"
         else
             echo -n "$icon"
         fi
@@ -208,9 +195,11 @@ do
 done
 for entry in "${all[@]}"
 do
-    confirmationMessages[$entry]=$(write_message "${icons[$entry]}" "Yes, ${texts[$entry]}")
+    # Add zero-width space character (\u200b) to icon to ensure confirmation-
+    # and regular messages never collide.
+    confirmationMessages[$entry]=$(write_message "${icons[$entry]}" "${texts[$entry]}")
 done
-confirmationMessages[cancel]=$(write_message "${icons[cancel]}" "No, cancel")
+confirmationMessages[cancel]=$(write_message "${icons[cancel]}" "Cancel")
 
 if [ $# -gt 0 ]
 then
@@ -247,9 +236,9 @@ else
                 if [ "$entry" = "$confirmation" ]
                 then
                     # Ask for confirmation
-                    echo -e "\0prompt\x1fAre you sure"
-                    echo -e "${confirmationMessages[$entry]}\0icon\x1f${icons[$entry]}"
-                    echo -e "${confirmationMessages[cancel]}\0icon\x1f${icons[cancel]}"
+                    # echo -e "\0prompt\x1fAre you sure"
+                    echo -e "${confirmationMessages[$entry]}"
+                    echo -e "${confirmationMessages[cancel]}"
                     exit 0
                 fi
             done

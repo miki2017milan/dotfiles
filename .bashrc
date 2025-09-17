@@ -1,6 +1,7 @@
 ### EXPORT
 export LC_ALL=C # For keyboard layout
 export PATH="$HOME/bin:$PATH"
+export PATH="$PATH:/home/milan/.dotnet/tools"
 
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return

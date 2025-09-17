@@ -8,14 +8,13 @@
     fg-col2: #f38ba8;
     grey: #6c7086;
 
-    font: "Mononoki Nerd Font 14";
+    font: "Mononoki Nerd Font 32";
 }
 
 window {
 	//location: east;
 	//anchor: east;
-	width: 200;
-	x-offset: -25px;
+	width: 500;
 	background-color: @bg-col;
 	border: 5px solid;
 	border-radius: 22;
@@ -51,9 +50,7 @@ element {
 element-text {
 	background-color: inherit;
 	text-color: inherit;
-	font: "Firacode Nerd Font 35";
 	align-items: center;
-	vertical-align: 0.5;
 	horizontal-align: 0.5;
 }
 

@@ -89,3 +89,7 @@ highlight Function         ctermfg=1    ctermbg=none    cterm=none
 " => Mouse Scrolling
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 set mouse=nicr
+set clipboard=unnamedplus
+
+map <Enter> o<ESC>
+map <S-Enter> O<ESC>
