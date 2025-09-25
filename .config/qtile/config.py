@@ -25,12 +25,12 @@ font = "Mononoki Nerd Font"
 # Apps
 terminal = "alacritty"
 browser = "firefox" 
-file_manager = ""
+file_manager = "pcmanfm"
 
 # Rofi
 launcher = "rofi -show drun -show-icons -icon-theme Papirus"
 show_windows = "rofi -show window -show-icons -icon-theme Papirus"
-power_menu = "rofi -show menu -modi 'menu:~/.config/rofi/scripts/rofi-power-menu --choices=shutdown/reboot --confirm=shutdown/reboot' -config ~/.config/rofi/power.rasi"
+power_menu = "rofi -show menu -modi 'menu:~/.config/rofi/scripts/rofi-power-menu --choices=shutdown/reboot' -config ~/.config/rofi/power.rasi"
 
 # Paths
 user_home = "/home/milan/"
@@ -198,6 +198,7 @@ keys = [
     Key([], "XF86AudioPrev", lazy.spawn('playerctl previous')),
     Key([], "XF86AudioNext", lazy.spawn('playerctl next')),
     
+    
     # Launch
     Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
     Key([mod], "Space", lazy.spawn(launcher), desc="Launch launcher"),
@@ -205,6 +206,7 @@ keys = [
     Key([mod], "b", lazy.spawn(browser), desc="Launch browser"),
     Key([mod], "e", lazy.spawn(file_manager), desc="Launch file manager"),
     Key([mod], "F4", lazy.spawn(power_menu), desc="Launch powermenu"),
+
     
     # Qtile
     Key([mod, "shift"], "r", lazy.reload_config(), desc="Reload the config"),
@@ -408,12 +410,23 @@ screen1 = [
     ),
 ]
 
+screen2 = screen1.copy()[:4]
+
 ### SCREENS ###
 
 screens = [
     Screen(
         top=bar.Bar(
             widgets=screen1,
+            size=56,
+            background=colors["bar_background"],
+            border_width=[0, 0, 5, 0],
+            border_color=colors["widget_background"]
+        ),
+    ),
+    Screen(
+        top=bar.Bar(
+            widgets=screen2,
             size=56,
             background=colors["bar_background"],
             border_width=[0, 0, 5, 0],

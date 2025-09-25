@@ -34,7 +34,7 @@ actions[reboot]="reboot"
 actions[shutdown]="shutdown now"
 
 # By default, ask for confirmation for actions that are irreversible
-confirmations=(reboot shutdown)
+confirmations=()
 
 # By default, no dry run
 dryrun=false
